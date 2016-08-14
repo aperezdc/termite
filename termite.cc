@@ -1040,6 +1040,12 @@ gboolean key_press_cb(VteTerminal *vte, GdkEventKey *event, keybind_info *info) 
                 gtk_widget_show(info->panel.da);
                 overlay_show(&info->panel, overlay_mode::urlselect, nullptr);
                 break;
+            case GDK_KEY_plus:
+                increase_font_scale(vte);
+                break;
+            case GDK_KEY_minus:
+                decrease_font_scale(vte);
+                break;
         }
         return TRUE;
     }
