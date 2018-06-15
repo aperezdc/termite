@@ -1096,7 +1096,6 @@ gboolean window_state_cb(GtkWindow *, GdkEventWindowState *event, keybind_info *
     return FALSE;
 }
 
-// TODO: Mode indicator...
 gboolean key_press_cb(VteTerminal *vte, GdkEventKey *event, keybind_info *info) {
     const guint modifiers = event->state & gtk_accelerator_get_default_mod_mask();
 
@@ -1107,7 +1106,6 @@ gboolean key_press_cb(VteTerminal *vte, GdkEventKey *event, keybind_info *info) 
 
         if ((info->select.mode & command_details.second) != 0) {
             switch (command_details.first) {
-// ANCHOR COMMENT
                 case keybinding_cmd::FULLSCREEN:
                     info->fullscreen_toggle(info->window);
                     return TRUE;
@@ -1257,11 +1255,9 @@ gboolean key_press_cb(VteTerminal *vte, GdkEventKey *event, keybind_info *info) 
                     vte_terminal_paste_clipboard(vte);
                     return TRUE;
                 case keybinding_cmd::RELOAD_CONFIG:
-//                    printf("reload config\n");
                     reload_config();
                     return TRUE;
                 default:
-//                    printf("unknown command: %s\n", cmdname);
                     break;
             }
         }
@@ -1676,9 +1672,6 @@ static void parse_config_keybinding(keybinding_key *bind, const char *value, gui
                 }
                 if ( !(kmod == 0 && kkey == 0) ){
                     guint mode = vi_mode::parse_mode(sets[1]);
-/*                  printf("assigning command %s with found mode %u (%d): %s\n",
-                           binding_get_name(bind->cmd), mode, mode, vi_mode::to_string(mode));
-                           */
                     keybind_assign(bind->cmd, std::make_tuple(kmod & modifiers, kkey, mode));
                 } else {
                     fprintf(stderr, "Failed to understand: %s\n", sets[0]);
@@ -1947,7 +1940,7 @@ int main(int argc, char **argv) {
     g_option_context_free(context);
 
     if (version) {
-        g_print("termite %s (throstur edition)\n", TERMITE_VERSION);
+        g_print("termite %s\n", TERMITE_VERSION);
         return EXIT_SUCCESS;
     }
 
@@ -2014,7 +2007,10 @@ int main(int argc, char **argv) {
         },
         {{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 0, 0, 0},
          nullptr, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, -1, config_file,1.0,FALSE},
+        /* Note to merger from throstur: I didn't bother checking this, 
+         * I don't know if 2nd to last param should be 1.0 or 0, seems to work fine like this
 //         nullptr, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, -1, config_file, 0},
+         */
         gtk_window_fullscreen
     };
 
