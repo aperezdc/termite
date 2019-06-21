@@ -1671,6 +1671,16 @@ static void on_alpha_screen_changed(GtkWindow *window, GdkScreen *, void *) {
     gtk_widget_set_visual(GTK_WIDGET(window), visual);
 }
 
+static void spawn_callback(VteTerminal *terminal, GPid pid, GError *error, gpointer user_data) {
+    if (!terminal) {
+        return;
+    }
+    if (pid == -1) {
+        g_printerr("the command failed to run: %s\n", error->message);
+        g_clear_error (&error);
+    }
+}
+
 int main(int argc, char **argv) {
     GError *error = nullptr;
     char *directory = nullptr;
@@ -1863,15 +1873,9 @@ int main(int argc, char **argv) {
     // Let VTE pick a reasonable value.
     env = g_environ_unsetenv(env, "TERM");
 
-    GPid child_pid;
-    if (vte_terminal_spawn_sync(vte, VTE_PTY_DEFAULT, nullptr, command_argv, env,
-                                G_SPAWN_SEARCH_PATH, nullptr, nullptr, &child_pid, nullptr,
-                                &error)) {
-        vte_terminal_watch_child(vte, child_pid);
-    } else {
-        g_printerr("the command failed to run: %s\n", error->message);
-        return EXIT_FAILURE;
-    }
+    vte_terminal_spawn_async(vte, VTE_PTY_DEFAULT, nullptr, command_argv, env,
+                                G_SPAWN_SEARCH_PATH, nullptr, nullptr, nullptr, -1,
+                                nullptr, spawn_callback, nullptr);
 
     int width, height, padding_left, padding_top, padding_right, padding_bottom;
     const long char_width = vte_terminal_get_char_width(vte);
