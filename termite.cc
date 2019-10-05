@@ -131,6 +131,7 @@ struct config_info {
     int tag;
     char *config_file;
     gdouble font_scale;
+    gboolean control_pressed;
 };
 
 struct keybind_info {
@@ -153,6 +154,7 @@ static void launch_browser(char *browser, char *url);
 static void window_title_cb(VteTerminal *vte, gboolean *dynamic_title);
 static gboolean window_state_cb(GtkWindow *window, GdkEventWindowState *event, keybind_info *info);
 static gboolean key_press_cb(VteTerminal *vte, GdkEventKey *event, keybind_info *info);
+static gboolean key_release_cb(VteTerminal *vte, GdkEventKey *event, keybind_info *info);
 static gboolean entry_key_press_cb(GtkEntry *entry, GdkEventKey *event, keybind_info *info);
 static gboolean position_overlay_cb(GtkBin *overlay, GtkWidget *widget, GdkRectangle *alloc);
 static gboolean button_press_cb(VteTerminal *vte, GdkEventButton *event, const config_info *info);
@@ -855,6 +857,11 @@ gboolean key_press_cb(VteTerminal *vte, GdkEventKey *event, keybind_info *info) 
         return TRUE;
     }
 
+    if (event->keyval == GDK_KEY_Control_L || event->keyval == GDK_KEY_Control_R) {
+        info->config.control_pressed = TRUE;
+        return TRUE;
+    }
+
     if (info->select.mode != vi_mode::insert) {
         if (modifiers == GDK_CONTROL_MASK) {
             switch (gdk_keyval_to_lower(event->keyval)) {
@@ -1121,6 +1128,14 @@ gboolean key_press_cb(VteTerminal *vte, GdkEventKey *event, keybind_info *info) 
     return FALSE;
 }
 
+gboolean key_release_cb(VteTerminal *vte, GdkEventKey *event, keybind_info *info) {
+    if (event->keyval == GDK_KEY_Control_L || event->keyval == GDK_KEY_Control_R) {
+        info->config.control_pressed = FALSE;
+        return TRUE;
+    }
+    return FALSE;
+}
+
 static void synthesize_keypress(GtkWidget *widget, unsigned keyval) {
     GdkEvent new_event;
 
@@ -1258,7 +1273,7 @@ gboolean position_overlay_cb(GtkBin *overlay, GtkWidget *widget, GdkRectangle *a
 }
 
 gboolean button_press_cb(VteTerminal *vte, GdkEventButton *event, const config_info *info) {
-    if (info->clickable_url && event->type == GDK_BUTTON_PRESS) {
+    if (info->clickable_url && info->control_pressed && event->type == GDK_BUTTON_PRESS) {
         auto match = make_unique(vte_terminal_hyperlink_check_event(vte, (GdkEvent*)event), g_free);
         if (!match) {
             match = make_unique(check_match(vte, event), g_free);
@@ -1804,8 +1819,8 @@ int main(int argc, char **argv) {
          nullptr},
         {vi_mode::insert, 0, 0, 0, 0, 0},
         {{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 0, 0, 0},
-         nullptr, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, -1, config_file, 0},
-        gtk_window_fullscreen
+         nullptr, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, -1, config_file, 0, FALSE},
+        gtk_window_fullscreen,
     };
 
     load_config(GTK_WINDOW(window), vte, scrollbar, hbox, &info.config,
@@ -1848,6 +1863,7 @@ int main(int argc, char **argv) {
     }
     g_signal_connect(window, "destroy", G_CALLBACK(exit_with_success), nullptr);
     g_signal_connect(vte, "key-press-event", G_CALLBACK(key_press_cb), &info);
+    g_signal_connect(vte, "key-release-event", G_CALLBACK(key_release_cb), &info);
     g_signal_connect(info.panel.entry, "key-press-event", G_CALLBACK(entry_key_press_cb), &info);
     g_signal_connect(panel_overlay, "get-child-position", G_CALLBACK(position_overlay_cb), nullptr);
     g_signal_connect(vte, "button-press-event", G_CALLBACK(button_press_cb), &info.config);
