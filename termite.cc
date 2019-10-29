@@ -1704,6 +1704,11 @@ static void spawn_callback(VteTerminal *terminal, GPid pid, GError *error, gpoin
     }
 }
 
+static void drag_data_received_cb(GtkWidget*, GdkDragContext*, int, int, GtkSelectionData* data, unsigned, unsigned, VteTerminal* vte) {
+    const char* t = reinterpret_cast<const char*>(gtk_selection_data_get_text(data));
+    vte_terminal_feed_child(vte, t, -1);
+}
+
 int main(int argc, char **argv) {
     GError *error = nullptr;
     char *directory = nullptr;
@@ -1828,6 +1833,10 @@ int main(int argc, char **argv) {
     gtk_container_add(GTK_CONTAINER(panel_overlay), hbox);
     gtk_container_add(GTK_CONTAINER(hint_overlay), vte_widget);
     gtk_container_add(GTK_CONTAINER(window), panel_overlay);
+
+    const GtkTargetEntry drag_entry = {const_cast<char*>("text/plain"), 0, 0};
+    gtk_drag_dest_set(window, GTK_DEST_DEFAULT_ALL, &drag_entry , 1, GDK_ACTION_COPY);
+    g_signal_connect(window, "drag-data-received", G_CALLBACK(drag_data_received_cb), info.vte);
 
     if (!hold) {
         g_signal_connect(vte, "child-exited", G_CALLBACK(exit_with_status), nullptr);
