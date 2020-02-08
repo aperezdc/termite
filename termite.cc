@@ -1705,8 +1705,13 @@ static void spawn_callback(VteTerminal *terminal, GPid pid, GError *error, gpoin
 }
 
 static void drag_data_received_cb(GtkWidget*, GdkDragContext*, int, int, GtkSelectionData* data, unsigned, unsigned, VteTerminal* vte) {
-    const char* t = reinterpret_cast<const char*>(gtk_selection_data_get_text(data));
-    vte_terminal_feed_child(vte, t, -1);
+    std::string selection {reinterpret_cast<const char*>(gtk_selection_data_get_text(data))};
+    std::string needle {"file://"};
+    if (selection.compare(0, needle.length(), needle) == 0) {
+        selection.erase(0, needle.length());
+    }
+    selection.erase(std::remove(selection.begin(), selection.end(), '\n'), selection.end());
+    vte_terminal_feed_child(vte, selection.c_str(), -1);
 }
 
 int main(int argc, char **argv) {
