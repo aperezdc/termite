@@ -22,5 +22,6 @@ Additionally, this fork has the following PRs applied:
 - https://github.com/thestinger/termite/pull/779 - Add config option to set VTE word character exceptions
 - https://github.com/thestinger/termite/pull/742 - Added a generic name to the termite.desktop
 - https://github.com/thestinger/termite/pull/734 - Add LICENSE file
+- https://github.com/thestinger/termite/pull/684 - use for spawning vte_terminal_spawn_async
 - https://github.com/thestinger/termite/pull/682 - 2 fixes to backwards-word
 - https://github.com/thestinger/termite/pull/443 - Vim movement count
