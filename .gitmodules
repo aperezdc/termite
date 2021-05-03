@@ -1,4 +1,0 @@
-[submodule "subprojects/vte"]
-	path = subprojects/vte
-	url = https://github.com/aperezdc/vte
-	branch = vte-0.64.0-termite
