@@ -8,6 +8,7 @@ project('termite', 'c', 'cpp',
 
 		# The following are all needed by the VTE subproject.
 		'b_ndebug=false',
+		'b_lto=false',
 		'c_std=gnu11',
 		'cpp_std=gnu++17',
 		'cpp_eh=default',
