@@ -381,8 +381,8 @@ static void draw_marker(cairo_t *cr, const PangoFontDescription *desc,
     pango_layout_get_size(layout, &width, &height);
 
     draw_rectangle(cr, static_cast<double>(x), static_cast<double>(y),
-                   static_cast<double>(width / PANGO_SCALE) + hints->padding * 2,
-                   static_cast<double>(height / PANGO_SCALE) + hints->padding * 2,
+                   static_cast<double>(width) / PANGO_SCALE + hints->padding * 2,
+                   static_cast<double>(height) / PANGO_SCALE + hints->padding * 2,
                    hints->roundness);
     cairo_set_source(cr, hints->border);
     cairo_set_line_width(cr, hints->border_width);
