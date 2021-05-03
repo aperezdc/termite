@@ -1702,6 +1702,7 @@ int main(int argc, char **argv) {
 
     if (version) {
         g_print("termite %s\n", TERMITE_VERSION);
+        g_print("vte %u.%u.%u %s\n", VTE_MAJOR_VERSION, VTE_MINOR_VERSION, VTE_MICRO_VERSION, vte_get_features());
         return EXIT_SUCCESS;
     }
 
