@@ -9,6 +9,9 @@ over the upstream version:
   installed on the system, a more modern VTE version with a few needed patches
   is built into a static library (as a Meson subproject) and linked into the
   `termite` binary.
+- The `TERM` environment variable is set to the value that VTE provides as
+  default. If it is good enough for every other VTE-based terminal, it should
+  be as well for Termite.
 
 Additionally, this fork has the following PRs applied:
 
