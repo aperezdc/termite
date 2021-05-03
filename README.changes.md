@@ -12,6 +12,8 @@ over the upstream version:
 - The `TERM` environment variable is set to the value that VTE provides as
   default. If it is good enough for every other VTE-based terminal, it should
   be as well for Termite.
+- Removed usage of `VTE_CHECK_VERSION()`, a recent version of VTE is always
+  built as subproject and there is no need for these checks.
 
 Additionally, this fork has the following PRs applied:
 

@@ -451,34 +451,22 @@ static void update_selection(VteTerminal *vte, const select_info *select) {
         const long begin = select->begin_row * n_columns + select->begin_col;
         const long end = cursor_row * n_columns + cursor_col;
         if (begin < end) {
-            selection_x_end = cursor_col;
-#if VTE_CHECK_VERSION(0, 55, 0)
-            selection_x_end += 1;
-#endif
+            selection_x_end = cursor_col + 1;
             vte_terminal_select_text(vte, select->begin_col, select->begin_row,
                                      selection_x_end, cursor_row);
         } else {
-            selection_x_end = select->begin_col;
-#if VTE_CHECK_VERSION(0, 55, 0)
-            selection_x_end += 1;
-#endif
+            selection_x_end = select->begin_col + 1;
             vte_terminal_select_text(vte, cursor_col, cursor_row,
                                      selection_x_end, select->begin_row);
         }
     } else if (select->mode == vi_mode::visual_line) {
-        selection_x_end = n_columns - 1;
-#if VTE_CHECK_VERSION(0, 55, 0)
-        selection_x_end += 1;
-#endif
+        selection_x_end = n_columns;
         vte_terminal_select_text(vte, 0,
                                  std::min(select->begin_row, cursor_row),
                                  selection_x_end,
                                  std::max(select->begin_row, cursor_row));
     } else if (select->mode == vi_mode::visual_block) {
-        selection_x_end = std::max(select->begin_col, cursor_col);
-#if VTE_CHECK_VERSION(0, 55, 0)
-        selection_x_end += 1;
-#endif
+        selection_x_end = std::max(select->begin_col, cursor_col) + 1;
         vte_terminal_select_text(vte,
                                  std::min(select->begin_col, cursor_col),
                                  std::min(select->begin_row, cursor_row),
@@ -994,11 +982,7 @@ gboolean key_press_cb(VteTerminal *vte, GdkEventKey *event, keybind_info *info) 
                 toggle_visual(vte, &info->select, vi_mode::visual_line);
                 break;
             case GDK_KEY_y:
-#if VTE_CHECK_VERSION(0, 50, 0)
                 vte_terminal_copy_clipboard_format(vte, VTE_FORMAT_TEXT);
-#else
-                vte_terminal_copy_clipboard(vte);
-#endif
                 break;
             case GDK_KEY_slash:
                 overlay_show(&info->panel, overlay_mode::search, vte);
@@ -1068,11 +1052,7 @@ gboolean key_press_cb(VteTerminal *vte, GdkEventKey *event, keybind_info *info) 
                 exit_command_mode(vte, &info->select);
                 return TRUE;
             case GDK_KEY_c:
-#if VTE_CHECK_VERSION(0, 50, 0)
                 vte_terminal_copy_clipboard_format(vte, VTE_FORMAT_TEXT);
-#else
-                vte_terminal_copy_clipboard(vte);
-#endif
                 return TRUE;
             case GDK_KEY_v:
                 vte_terminal_paste_clipboard(vte);
@@ -1253,14 +1233,10 @@ gboolean position_overlay_cb(GtkBin *overlay, GtkWidget *widget, GdkRectangle *a
 
 gboolean button_press_cb(VteTerminal *vte, GdkEventButton *event, const config_info *info) {
     if (info->clickable_url && event->type == GDK_BUTTON_PRESS) {
-#if VTE_CHECK_VERSION (0, 49, 1)
         auto match = make_unique(vte_terminal_hyperlink_check_event(vte, (GdkEvent*)event), g_free);
         if (!match) {
             match = make_unique(check_match(vte, event), g_free);
         }
-#else
-        auto match = make_unique(check_match(vte, event), g_free);
-#endif
         if (!match)
             return FALSE;
 
@@ -1545,14 +1521,10 @@ static void set_config(GtkWindow *window, VteTerminal *vte, GtkWidget *scrollbar
     vte_terminal_set_mouse_autohide(vte, cfg_bool("mouse_autohide", FALSE));
     vte_terminal_set_allow_bold(vte, cfg_bool("allow_bold", TRUE));
     vte_terminal_search_set_wrap_around(vte, cfg_bool("search_wrap", TRUE));
-#if VTE_CHECK_VERSION (0, 49, 1)
     vte_terminal_set_allow_hyperlink(vte, cfg_bool("hyperlinks", FALSE));
-#endif
-#if VTE_CHECK_VERSION (0, 51, 2)
     vte_terminal_set_bold_is_bright(vte, cfg_bool("bold_is_bright", TRUE));
     vte_terminal_set_cell_height_scale(vte, get_config_double(config, "options", "cell_height_scale").get_value_or(1.0));
     vte_terminal_set_cell_width_scale(vte, get_config_double(config, "options", "cell_width_scale").get_value_or(1.0));
-#endif
     info->dynamic_title = cfg_bool("dynamic_title", TRUE);
     info->urgent_on_bell = cfg_bool("urgent_on_bell", TRUE);
     info->clickable_url = cfg_bool("clickable_url", TRUE);
