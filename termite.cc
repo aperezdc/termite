@@ -1695,7 +1695,6 @@ static void on_alpha_screen_changed(GtkWindow *window, GdkScreen *, void *) {
 
 int main(int argc, char **argv) {
     GError *error = nullptr;
-    const char *const term = "xterm-termite";
     char *directory = nullptr;
     gboolean version = FALSE, hold = FALSE;
 
@@ -1882,7 +1881,8 @@ int main(int argc, char **argv) {
     }
 #endif
 
-    env = g_environ_setenv(env, "TERM", term, TRUE);
+    // Let VTE pick a reasonable value.
+    env = g_environ_unsetenv(env, "TERM");
 
     GPid child_pid;
     if (vte_terminal_spawn_sync(vte, VTE_PTY_DEFAULT, nullptr, command_argv, env,

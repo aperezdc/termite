@@ -21,17 +21,6 @@ add_project_arguments(
 	language: 'cpp',
 )
 
-tic_exe = find_program('tic', native: true)
-tic_sh = find_program('tic.sh', native: true)
-
-termite_tinfo = custom_target('terminfo',
-	input: 'termite.terminfo',
-	output: 'xterm-termite',
-	command: [tic_sh, tic_exe.full_path(), '@PRIVATE_DIR@', '@INPUT@', '@OUTPUT@'],
-	install: true,
-	install_dir: get_option('datadir') / 'terminfo' / 'x',
-)
-
 vte_subproject = subproject('vte',
 	default_options: [
 		'default_library=static',
