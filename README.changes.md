@@ -13,10 +13,7 @@ over the upstream version:
 Additionally, this fork has the following PRs applied:
 
 - https://github.com/thestinger/termite/pull/779 - Add config option to set VTE word character exceptions
-- https://github.com/thestinger/termite/pull/778 - Added truecolor support to the terminfo
-- https://github.com/thestinger/termite/pull/763 - Add blink string to the properties
 - https://github.com/thestinger/termite/pull/742 - Added a generic name to the termite.desktop
 - https://github.com/thestinger/termite/pull/734 - Add LICENSE file
 - https://github.com/thestinger/termite/pull/682 - 2 fixes to backwards-word
-- https://github.com/thestinger/termite/pull/677 - adding missing arrowkey terminfo entries
 - https://github.com/thestinger/termite/pull/443 - Vim movement count
