@@ -5,10 +5,9 @@ project('termite', 'c', 'cpp',
 		'b_asneeded=true',
 		'b_lundef=false',
 		'gnu_symbol_visibility=hidden',
+		'b_ndebug=if-release',
 
 		# The following are all needed by the VTE subproject.
-		'b_ndebug=false',
-		'b_lto=false',
 		'c_std=gnu11',
 		'cpp_std=gnu++17',
 		'cpp_eh=default',
