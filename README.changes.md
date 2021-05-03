@@ -15,6 +15,8 @@ over the upstream version:
 - Removed usage of `VTE_CHECK_VERSION()`, a recent version of VTE is always
   built as subproject and there is no need for these checks.
 
+For other notable changes, check the release notes in [NEWS](NEWS.md) file.
+
 Additionally, this fork has the following PRs applied:
 
 - https://github.com/thestinger/termite/pull/779 - Add config option to set VTE word character exceptions
