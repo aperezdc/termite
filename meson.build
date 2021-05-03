@@ -42,7 +42,7 @@ executable('termite',
 )
 
 install_data('config',
-	install_dir: get_option('sysconfdir') / 'etc' / 'xdg' / 'termite',
+	install_dir: get_option('sysconfdir') / 'xdg' / 'termite',
 )
 install_data('termite.desktop',
 	install_dir: get_option('datadir') / 'applications',
