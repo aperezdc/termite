@@ -1,6 +1,3 @@
-[submodule "util"]
-	path = util
-	url = https://github.com/thestinger/util.git
 [submodule "subprojects/vte"]
 	path = subprojects/vte
 	url = https://github.com/aperezdc/vte

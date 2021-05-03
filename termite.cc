@@ -25,6 +25,7 @@
 #include <limits>
 #include <map>
 #include <memory>
+#include <optional>
 #include <vector>
 #include <set>
 #include <string>
@@ -40,11 +41,14 @@
 #endif
 
 #include "url_regex.hh"
-#include "util/clamp.hh"
-#include "util/maybe.hh"
-#include "util/memory.hh"
 
 using namespace std::placeholders;
+
+template <typename T, typename Deleter>
+std::unique_ptr<T, Deleter> make_unique(T* p, Deleter d)
+{
+    return std::unique_ptr<T, Deleter>(p, d);
+}
 
 /* Allow scales a bit smaller and a bit larger than the usual pango ranges */
 #define TERMINAL_SCALE_XXX_SMALL   (PANGO_SCALE_XX_SMALL/1.2)
@@ -1355,10 +1359,10 @@ char *check_match(VteTerminal *vte, GdkEventButton *event) {
 
 /* {{{ CONFIG LOADING */
 template<typename T>
-maybe<T> get_config(T (*get)(GKeyFile *, const char *, const char *, GError **),
+std::optional<T> get_config(T (*get)(GKeyFile *, const char *, const char *, GError **),
                     GKeyFile *config, const char *group, const char *key) {
     GError *error = nullptr;
-    maybe<T> value = get(config, group, key, &error);
+    std::optional<T> value = get(config, group, key, &error);
     if (error) {
         g_error_free(error);
         return {};
@@ -1373,7 +1377,7 @@ auto get_config_string(std::bind(get_config<char *>, g_key_file_get_string,
 auto get_config_double(std::bind(get_config<double>, g_key_file_get_double,
                                  _1, _2, _3));
 
-static maybe<GdkRGBA> get_config_color(GKeyFile *config, const char *section, const char *key) {
+static std::optional<GdkRGBA> get_config_color(GKeyFile *config, const char *section, const char *key) {
     if (auto s = get_config_string(config, section, key)) {
         GdkRGBA color;
         if (gdk_rgba_parse(&color, *s)) {
@@ -1386,7 +1390,7 @@ static maybe<GdkRGBA> get_config_color(GKeyFile *config, const char *section, co
     return {};
 }
 
-static maybe<cairo_pattern_t *>
+static std::optional<cairo_pattern_t *>
 get_config_cairo_color(GKeyFile *config, const char *group, const char *key) {
     if (auto color = get_config_color(config, group, key)) {
         return cairo_pattern_create_rgba(color->red,
@@ -1454,14 +1458,14 @@ static void load_theme(GtkWindow *window, VteTerminal *vte, GKeyFile *config, hi
         g_free(*s);
     }
 
-    hints.fg = get_config_cairo_color(config, "hints", "foreground").get_value_or(cairo_pattern_create_rgb(1, 1, 1));
-    hints.bg = get_config_cairo_color(config, "hints", "background").get_value_or(cairo_pattern_create_rgb(0, 0, 0));
-    hints.af = get_config_cairo_color(config, "hints", "active_foreground").get_value_or(cairo_pattern_create_rgb(0.9, 0.5, 0.5));
-    hints.ab = get_config_cairo_color(config, "hints", "active_background").get_value_or(cairo_pattern_create_rgb(0, 0, 0));
-    hints.border = get_config_cairo_color(config, "hints", "border").get_value_or(hints.fg);
-    hints.padding = get_config_double(config, "hints", "padding", 5).get_value_or(2.0);
-    hints.border_width = get_config_double(config, "hints", "border_width").get_value_or(1.0);
-    hints.roundness = get_config_double(config, "hints", "roundness").get_value_or(1.5);
+    hints.fg = get_config_cairo_color(config, "hints", "foreground").value_or(cairo_pattern_create_rgb(1, 1, 1));
+    hints.bg = get_config_cairo_color(config, "hints", "background").value_or(cairo_pattern_create_rgb(0, 0, 0));
+    hints.af = get_config_cairo_color(config, "hints", "active_foreground").value_or(cairo_pattern_create_rgb(0.9, 0.5, 0.5));
+    hints.ab = get_config_cairo_color(config, "hints", "active_background").value_or(cairo_pattern_create_rgb(0, 0, 0));
+    hints.border = get_config_cairo_color(config, "hints", "border").value_or(hints.fg);
+    hints.padding = get_config_double(config, "hints", "padding", 5).value_or(2.0);
+    hints.border_width = get_config_double(config, "hints", "border_width").value_or(1.0);
+    hints.roundness = get_config_double(config, "hints", "roundness").value_or(1.5);
 }
 
 static void load_config(GtkWindow *window, VteTerminal *vte, GtkWidget *scrollbar,
@@ -1512,7 +1516,7 @@ static void set_config(GtkWindow *window, VteTerminal *vte, GtkWidget *scrollbar
 
     auto cfg_bool = [config](const char *key, gboolean value) {
         return get_config<gboolean>(g_key_file_get_boolean,
-                                    config, "options", key).get_value_or(value);
+                                    config, "options", key).value_or(value);
     };
 
     vte_terminal_set_scroll_on_output(vte, cfg_bool("scroll_on_output", FALSE));
@@ -1523,8 +1527,8 @@ static void set_config(GtkWindow *window, VteTerminal *vte, GtkWidget *scrollbar
     vte_terminal_search_set_wrap_around(vte, cfg_bool("search_wrap", TRUE));
     vte_terminal_set_allow_hyperlink(vte, cfg_bool("hyperlinks", FALSE));
     vte_terminal_set_bold_is_bright(vte, cfg_bool("bold_is_bright", TRUE));
-    vte_terminal_set_cell_height_scale(vte, get_config_double(config, "options", "cell_height_scale").get_value_or(1.0));
-    vte_terminal_set_cell_width_scale(vte, get_config_double(config, "options", "cell_width_scale").get_value_or(1.0));
+    vte_terminal_set_cell_height_scale(vte, get_config_double(config, "options", "cell_height_scale").value_or(1.0));
+    vte_terminal_set_cell_width_scale(vte, get_config_double(config, "options", "cell_width_scale").value_or(1.0));
     info->dynamic_title = cfg_bool("dynamic_title", TRUE);
     info->urgent_on_bell = cfg_bool("urgent_on_bell", TRUE);
     info->clickable_url = cfg_bool("clickable_url", TRUE);
