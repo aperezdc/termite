@@ -41,6 +41,9 @@ scrollback_lines = 10000
 # "off", "left" or "right"
 #scrollbar = off
 
+# Whether to prefer using the GTK dark theme variant.
+#gtk_dark_theme = false
+
 [colors]
 # If both of these are unset, cursor falls back to the foreground color,
 # and cursor_foreground falls back to the background color.

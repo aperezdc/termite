@@ -1632,6 +1632,8 @@ static void set_config(GtkWindow *window, VteTerminal *vte, GtkWidget *scrollbar
         *show_scrollbar_ptr = show_scrollbar;
     }
 
+    g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", cfg_bool("gtk_dark_theme", FALSE), nullptr);
+
     load_theme(window, vte, config, info->hints);
 }/*}}}*/
 
