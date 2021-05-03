@@ -16,7 +16,7 @@ project('termite', 'c', 'cpp',
 )
 
 add_project_arguments(
-	'-DTERMITE_VERSION="' + meson.project_version().split('.')[0] + '"',
+	'-DTERMITE_VERSION="v' + meson.project_version().split('.')[0] + '"',
 	'-D_POSIX_C_SOURCE=200809L',
 	language: 'cpp',
 )
