@@ -902,16 +902,12 @@ gboolean key_press_cb(VteTerminal *vte, GdkEventKey *event, keybind_info *info) 
                 gtk_widget_hide(info->panel.entry);
                 info->panel.url_list.clear();
                 break;
-            case GDK_KEY_Page_Up: {
-                const long nrows = vte_terminal_get_row_count(vte) - 1;
-                move(vte, &info->select, 0, -std::clamp(nrows, 0L, nrows));
+            case GDK_KEY_Page_Up:
+                move(vte, &info->select, 0, -(vte_terminal_get_row_count(vte) - 1));
                 break;
-            }
-            case GDK_KEY_Page_Down: {
-                const long nrows = vte_terminal_get_row_count(vte) - 1;
-                move(vte, &info->select, 0, std::clamp(nrows, 0L, nrows));
+            case GDK_KEY_Page_Down:
+                move(vte, &info->select, 0, (vte_terminal_get_row_count(vte) - 1));
                 break;
-            }
             case GDK_KEY_Left:
             case GDK_KEY_h:
                 move(vte, &info->select, -1, 0);
