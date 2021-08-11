@@ -2,6 +2,18 @@
 
 This file documents notable user-facing changes introduced in each release.
 
+## v15.3
+
+### Added
+
+- Make `PageDown` and `PageUp` work in command mode, moving by one screenful
+  at a time (sans one line for context).
+
+### Changed
+
+- Update VTE subproject to a prerelease of version 0.64.3.
+
+
 ## v15.2
 
 ### Changed
