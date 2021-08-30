@@ -2,6 +2,23 @@
 
 This file documents notable user-facing changes introduced in each release.
 
+## v16.0
+
+### Added
+
+- New `smart_copy` configuration option, which enables using `Ctrl-C` and
+  `Ctrl-V` for copy-paste (instead of the usual `Ctrl-Shift-C` and
+  `Ctrl-Shift-V`).
+- New `clickable_url_ctrl` configuration option, which changes behaviour
+  to require `Ctrl` to be pressed to act on detected URLs.
+- Support dragging text and files onto Termite windows. Files are converted
+  into their file system path.
+
+### Changed
+
+- Update VTE subproject to a prerelease of version 0.64.3.
+
+
 ## v15.3
 
 ### Added
