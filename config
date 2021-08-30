@@ -5,6 +5,7 @@
 #cell_height_scale = 1.0
 #cell_width_scale = 1.0
 #clickable_url = true
+#clickable_url_ctrl = false
 #dynamic_title = true
 font = Monospace 9
 #fullscreen = true
