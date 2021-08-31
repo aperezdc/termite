@@ -1041,10 +1041,15 @@ gboolean key_press_cb(VteTerminal *vte, GdkEventKey *event, keybind_info *info) 
                 overlay_show(&info->panel, overlay_mode::urlselect, nullptr);
                 break;
             case GDK_KEY_plus:
+            case GDK_KEY_KP_Add:
                 increase_font_scale(vte);
                 break;
+            case GDK_KEY_KP_Subtract:
             case GDK_KEY_minus:
                 decrease_font_scale(vte);
+                break;
+            case GDK_KEY_equal:
+                reset_font_scale(vte, info->config.font_scale);
                 break;
         }
         return TRUE;
