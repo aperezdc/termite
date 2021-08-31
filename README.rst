@@ -1,3 +1,7 @@
+=======
+Termite
+=======
+
 A keyboard-centric VTE-based terminal, aimed at use within a window manager
 with tiling and/or tabbing support.
 
@@ -9,26 +13,77 @@ Termite's exit status is 1 on a failure, including a termination of the child
 process from an uncaught signal. Otherwise the exit status is that of the child
 process.
 
+
+About this fork
+---------------
+
+.. admonition:: notice
+
+   The old contents of thise file are available in `<README.old.rst>`__.
+
+The original authors of Termite are now `recommending Alacritty`__, which is
+indeed a fine terminal emulator; but it has a few shortcomings:
+
+__ https://github.com/thestinger/termite#termite-is-obsoleted-by-alacritty
+
+* Alacritty *requires* an OpenGL capable graphics card. While software
+  rendering is possible, it is considerably slower. Termite can be used
+  comfortably in systems without hardware accelerated graphics.
+* While Alacritty's hints mode can be configured to behave similarly to
+  Termite, it is *not exactly the same*. Some people may still prefer the
+  user experience provided by Termite.
+* Termite is written in C++, which is *more widely supported* than Rust.
+  Alacritty currently does not work on architectures and operating systems
+  where a Rust compiler is not available.
+
+`Adrián Pérez <https://github.com/aperezdc>`__ tried to contact the main
+author offering to continue development, without receiving a reply. While
+the original Termite authors discourage forking and contributing to Alacritty
+instead, we believe that there are reasons for Termite to continue existing,
+and plan to continue maintenance. If you were planning on improving Termite
+but were discouraged for lack of an active upstream, please do consider
+contributing to this fork.
+
+
 DEPENDENCIES
 ============
 
-The `vte-ng <https://github.com/thestinger/vte-ng>`_ project is required until
-VTE exposes the necessary functions for keyboard text selection and URL hints
-(if ever). A simple patch `has been submitted upstream
-<https://bugzilla.gnome.org/show_bug.cgi?id=679658#c10>`_ but they're unwilling
-to expose functionality that's not required by GNOME Terminal even if there's
-no extra maintenance (it already exists internally) and no additional backwards
-compatibility hazards.
+A slightly `modified version of VTE`__ exposing the necessary functions for
+keyboard text selection and URL hints is built into Termite as a Meson
+subproject, and is included in packaged releases__.
 
-If no browser is configured and $BROWSER is unset, xdg-open from xdg-utils is
-used as a fallback.
+__ https://github.com/aperezdc/vte/tree/vte-0.64-termite
+__ https://github.com/aperezdc/termite/releases
+
+This means that you will need the dependencies needed to build VTE in order
+to build Termite:
+
+- Fribidi
+- GPerf
+- GTK+ 3.0
+- GnuTLS
+- PCRE2
+- libsystemd
+
+If no browser is configured and ``$BROWSER`` is unset, ``xdg-open`` from
+xdg-utils is used as a fallback.
 
 BUILDING
 ========
 ::
 
-    git clone --recursive https://github.com/thestinger/termite.git
-    cd termite && make
+    git clone https://github.com/aperezdc/termite.git
+    meson setup build termite
+    meson compile -C build
+
+INSTALLING
+==========
+::
+
+    meson install -C build --skip-subprojects vte
+
+Packagers may want to add ``--destdir=…`` to the above command.
+
 
 KEYBINDINGS
 ===========
@@ -71,24 +126,15 @@ INSERT MODE
 +----------------------+---------------------------------------------+
 
 .. [1] The directory can be set by a process running in the terminal. For
-       example, with zsh:
+       example:
 
        .. code:: sh
 
-            if [[ $TERM == xterm-termite ]]; then
+            if [[ ${VTE_VERSION:-0} -ge 3405 ]]; then
               . /etc/profile.d/vte.sh
               __vte_osc7
             fi
-       ::
 
-       For example, with bash:
-
-       .. code:: sh
-
-            if [[ $TERM == xterm-termite ]]; then
-              . /etc/profile.d/vte.sh
-              __vte_prompt_command
-            fi
 
 SELECTION MODE
 --------------
@@ -189,25 +235,22 @@ standard usage of the CSS padding property.
 TERMINFO
 ========
 
-When working on a remote system with termite's terminfo missing, an error might
+Termite v15.1 and newer do *not* use a custom terminfo anymore; the built-in
+VTE behaviour of using ``xterm-256color`` is kept. When working on a remote
+system with this terminfo entry missing, an error might
 occur:
 
 ::
 
-    Error opening terminal: xterm-termite
+    Error opening terminal: xterm-256color
 
-To solve this issue, install the termite terminfo on your remote system.
+To solve this issue, install the package that provides terminfo entries on
+your remote system. Typically those are shipped as part of the ``ncurses``
+package.
 
-On Arch Linux:
-
-::
-
-        pacman -S termite-terminfo
-
-On other systems:
-
+For example, on Arch Linux:
 
 ::
 
-    wget https://raw.githubusercontent.com/thestinger/termite/master/termite.terminfo
-    tic -x termite.terminfo
+        pacman -S ncurses
+
