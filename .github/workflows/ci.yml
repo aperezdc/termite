@@ -1,0 +1,82 @@
+---
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  linux:
+    name: Linux
+    runs-on: ubuntu-20.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - compiler: clang
+            cxxcompiler: clang++
+          - compiler: gcc
+            cxxcompiler: g++
+    env:
+      CC: ${{ matrix.compiler }}
+      CXX: ${{ matrix.cxxcompiler }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Setup cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('.github/workflows/ci.yml') }}
+          restore-keys: ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          echo '::group::Update apt'
+          sudo apt update
+          echo '::endgroup::'
+
+          echo '::group::Install packages'
+          sudo apt install -y --no-install-recommends \
+            gperf \
+            libgnutls28-dev \
+            libgtk-3-dev \
+            libpcre2-dev \
+            libsystemd-dev \
+            ninja-build
+          echo '::endgroup::'
+
+          echo '::group::Python packages'
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install meson==0.58
+          echo '::endgroup::'
+
+      - name: Install GCC problem matcher
+        uses: ammaraskar/gcc-problem-matcher@master
+
+      - name: Build
+        run: |
+          echo '::group::Configure'
+          meson --prefix /usr _build
+          echo '::endgroup::'
+
+          echo '::group::Compile'
+          meson compile -C _build
+          echo '::endgroup::'
+
+      - name: Test
+        run: |
+          meson test -C _build
