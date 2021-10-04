@@ -2,6 +2,22 @@
 
 This file documents notable user-facing changes introduced in each release.
 
+## v16.1
+
+### Added
+
+- Make `Ctrl-+`, `Ctrl--`, and `Ctrl-=` are not usable in selection mode.
+
+### Fixed
+
+- Make `Ctrl-+` and `Ctrl--` work when the plus and minus keys from the
+  numeric keypad are used.
+
+### Changed
+
+- Update VTE subproject to version 0.66.0.
+
+
 ## v16.0
 
 ### Added
