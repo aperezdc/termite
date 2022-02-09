@@ -2,6 +2,15 @@
 
 This file documents notable user-facing changes introduced in each release.
 
+## v16.3
+
+### Changed
+
+- Update VTE subproject to a prerelease of version 0.66.3, which fixes
+  a crash triggered by visually selecting text when certain fonts and
+  sizes are configured (for example Cascadia Mono at 12pt).
+
+
 ## v16.2
 
 ### Changed
