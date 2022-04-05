@@ -18,8 +18,8 @@ jobs:
         include:
           - compiler: clang
             cxxcompiler: clang++
-          - compiler: gcc
-            cxxcompiler: g++
+          - compiler: gcc-10
+            cxxcompiler: g++-10
     env:
       CC: ${{ matrix.compiler }}
       CXX: ${{ matrix.cxxcompiler }}
@@ -56,7 +56,9 @@ jobs:
             libgtk-3-dev \
             libpcre2-dev \
             libsystemd-dev \
-            ninja-build
+            ninja-build \
+            gcc-10 \
+            g++-10
           echo '::endgroup::'
 
           echo '::group::Python packages'
