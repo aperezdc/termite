@@ -2,6 +2,13 @@
 
 This file documents notable user-facing changes introduced in each release.
 
+## Unreleased
+
+### v16.4
+
+- Update VTE subproject to version 0.68.0.
+
+
 ## v16.3
 
 ### Changed
