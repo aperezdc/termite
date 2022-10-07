@@ -1567,6 +1567,7 @@ static void set_config(GtkWindow *window, VteTerminal *vte, GtkWidget *scrollbar
     vte_terminal_set_bold_is_bright(vte, cfg_bool("bold_is_bright", TRUE));
     vte_terminal_set_cell_height_scale(vte, get_config_double(config, "options", "cell_height_scale").value_or(1.0));
     vte_terminal_set_cell_width_scale(vte, get_config_double(config, "options", "cell_width_scale").value_or(1.0));
+    vte_terminal_set_enable_bidi(vte, cfg_bool("bidi", FALSE));
     info->dynamic_title = cfg_bool("dynamic_title", TRUE);
     info->urgent_on_bell = cfg_bool("urgent_on_bell", TRUE);
     info->clickable_url = cfg_bool("clickable_url", TRUE);

@@ -4,6 +4,10 @@ This file documents notable user-facing changes introduced in each release.
 
 ## Unreleased
 
+### Added
+
+- New `bidi` configuration option, which enables rendering of bidirectional text.
+
 ### Changed
 
 - Update VTE subproject to version 0.70.0.
