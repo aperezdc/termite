@@ -6,7 +6,10 @@ This file documents notable user-facing changes introduced in each release.
 
 ### Added
 
-- New `bidi` configuration option, which enables rendering of bidirectional text.
+- New `bidi` configuration option, which enables rendering of
+  bidirectional text.
+- New `arabic_shaping` configuration option, which enables shaping of
+  Arabic text.
 
 ### Changed
 
