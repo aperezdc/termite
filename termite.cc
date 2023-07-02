@@ -1201,7 +1201,11 @@ gboolean key_press_cb(VteTerminal *vte, GdkEventKey *event, keybind_info *info) 
                     toggle_visual(vte, &info->select, vi_mode::visual_line);
                     return TRUE;
                 case keybinding_cmd::COPY_CLIPBOARD:
-                    vte_terminal_copy_clipboard(vte);
+#if VTE_CHECK_VERSION(0, 50, 0)
+					vte_terminal_copy_clipboard_format(vte, VTE_FORMAT_TEXT);
+#else
+					vte_terminal_copy_clipboard(vte);
+#endif
                     show_popup(vte, &(info->select.mode_ind), "yank");
                     return TRUE;
                 case keybinding_cmd::SEARCH:
