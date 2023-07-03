@@ -2,6 +2,15 @@
 
 This file documents notable user-facing changes introduced in each release.
 
+## v16.6
+
+### Changed
+
+- Improved URL regex matching.
+- Update VTE subproject to version 0.72.2.
+- Meson 0.60.0 or newer is now required for building.
+
+
 ## v16.5
 
 ### Added
