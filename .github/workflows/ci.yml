@@ -63,7 +63,7 @@ jobs:
 
           echo '::group::Python packages'
           python -m pip install --upgrade pip setuptools wheel
-          python -m pip install meson==0.58
+          python -m pip install meson==0.60
           echo '::endgroup::'
 
       - name: Install GCC problem matcher
