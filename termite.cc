@@ -127,10 +127,11 @@ struct config_info {
     hint_info hints;
     char *browser;
     gboolean dynamic_title, urgent_on_bell, clickable_url, clickable_url_ctrl, size_hints;
-    gboolean filter_unmatched_urls, modify_other_keys, fullscreen, smart_copy;
+    gboolean filter_unmatched_urls, modify_other_keys, fullscreen, smart_copy, dpi_aware;
     int tag;
     char *config_file;
     gdouble font_scale;
+    int font_size;
 };
 
 struct keybind_info {
@@ -158,6 +159,7 @@ static gboolean position_overlay_cb(GtkBin *overlay, GtkWidget *widget, GdkRecta
 static gboolean button_press_cb(VteTerminal *vte, GdkEventButton *event, const config_info *info);
 static void bell_cb(GtkWidget *vte, gboolean *urgent_on_bell);
 static gboolean focus_cb(GtkWindow *window);
+static void configure_cb(GtkWidget *widget, GdkEventConfigure *event, keybind_info *info);
 
 static GtkTreeModel *create_completion_model(VteTerminal *vte);
 static void search(VteTerminal *vte, const char *pattern, bool reverse);
@@ -1304,6 +1306,42 @@ gboolean focus_cb(GtkWindow *window) {
     gtk_window_set_urgency_hint(window, FALSE);
     return FALSE;
 }
+
+static void
+adjust_font_size(VteTerminal* vte, int font_size)
+{
+    // Skip if the configuration specifies an absolute (pixel based) font size.
+    if (!font_size)
+        return;
+
+    // If there is no window, that means we are at early startup reading the
+    // config file, and configure_cb() will be triggered later to adjust the
+    // absolute size.
+    auto* window = gtk_widget_get_window(GTK_WIDGET(vte));
+    if (!window)
+        return;
+
+    auto* screen = gtk_widget_get_screen(GTK_WIDGET(vte));
+    auto* display = gdk_screen_get_display(screen);
+    auto* monitor = gdk_display_get_monitor_at_window(display, window);
+
+    GdkRectangle geometry;
+    gdk_monitor_get_geometry(monitor, &geometry);
+
+    static constexpr double mm_per_pt = 25.4 / 72.0;  // DTP point.
+    const auto height_mm = mm_per_pt * font_size;
+    const auto height_px = geometry.height * height_mm / gdk_monitor_get_height_mm(monitor);
+
+    PangoFontDescription *font = pango_font_description_copy_static(vte_terminal_get_font(vte));
+    pango_font_description_set_absolute_size(font, height_px);
+    vte_terminal_set_font(vte, font);
+    pango_font_description_free(font);
+}
+
+void configure_cb(GtkWidget *widget, GdkEventConfigure *event, keybind_info *info) {
+    if (info->config.dpi_aware)
+        adjust_font_size(info->vte, info->config.font_size);
+}
 /* }}} */
 
 GtkTreeModel *create_completion_model(VteTerminal *vte) {
@@ -1578,6 +1616,7 @@ static void set_config(GtkWindow *window, VteTerminal *vte, GtkWidget *scrollbar
     info->modify_other_keys = cfg_bool("modify_other_keys", FALSE);
     info->fullscreen = cfg_bool("fullscreen", TRUE);
     info->smart_copy = cfg_bool("smart_copy", FALSE);
+    info->dpi_aware = cfg_bool("dpi_aware", FALSE);
     info->font_scale = vte_terminal_get_font_scale(vte);
 
     g_free(info->browser);
@@ -1612,8 +1651,13 @@ static void set_config(GtkWindow *window, VteTerminal *vte, GtkWidget *scrollbar
 
     if (auto s = get_config_string(config, "options", "font")) {
         PangoFontDescription *font = pango_font_description_from_string(*s);
+        info->font_size = pango_font_description_get_size_is_absolute(font)
+            ? 0
+            : pango_font_description_get_size(font);
         vte_terminal_set_font(vte, font);
         pango_font_description_free(font);
+        if (info->dpi_aware)
+            adjust_font_size(vte, info->font_size);
         g_free(*s);
     }
 
@@ -1823,7 +1867,7 @@ int main(int argc, char **argv) {
          nullptr},
         {vi_mode::insert, 0, 0, 0, 0, 0},
         {{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 0, 0, 0},
-         nullptr, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, -1, config_file, 0},
+         nullptr, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, -1, config_file, 0},
         gtk_window_fullscreen
     };
 
@@ -1879,6 +1923,8 @@ int main(int argc, char **argv) {
 
     on_alpha_screen_changed(GTK_WINDOW(window), nullptr, nullptr);
     g_signal_connect(window, "screen-changed", G_CALLBACK(on_alpha_screen_changed), nullptr);
+
+    g_signal_connect(window, "configure-event", G_CALLBACK(configure_cb), &info);
 
     if (info.config.fullscreen) {
         g_signal_connect(window, "window-state-event", G_CALLBACK(window_state_cb), &info);
