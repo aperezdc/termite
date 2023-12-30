@@ -1308,16 +1308,15 @@ gboolean focus_cb(GtkWindow *window) {
 }
 
 static void
-adjust_font_size(VteTerminal* vte, int font_size)
+adjust_font_size(VteTerminal* vte, GdkWindow* window, int font_size)
 {
     // Skip if the configuration specifies an absolute (pixel based) font size.
     if (!font_size)
         return;
 
     // If there is no window, that means we are at early startup reading the
-    // config file, and configure_cb() will be triggered later to adjust the
-    // absolute size.
-    auto* window = gtk_widget_get_window(GTK_WIDGET(vte));
+    // config file, and the configure callback will be triggered later to
+    // adjust the absolute size.
     if (!window)
         return;
 
@@ -1336,11 +1335,6 @@ adjust_font_size(VteTerminal* vte, int font_size)
     pango_font_description_set_absolute_size(font, height_px);
     vte_terminal_set_font(vte, font);
     pango_font_description_free(font);
-}
-
-void configure_cb(GtkWidget *widget, GdkEventConfigure *event, keybind_info *info) {
-    if (info->config.dpi_aware)
-        adjust_font_size(info->vte, info->config.font_size);
 }
 /* }}} */
 
@@ -1657,7 +1651,7 @@ static void set_config(GtkWindow *window, VteTerminal *vte, GtkWidget *scrollbar
         vte_terminal_set_font(vte, font);
         pango_font_description_free(font);
         if (info->dpi_aware)
-            adjust_font_size(vte, info->font_size);
+            adjust_font_size(vte, gtk_widget_get_window(GTK_WIDGET(vte)), info->font_size);
         g_free(*s);
     }
 
@@ -1924,7 +1918,16 @@ int main(int argc, char **argv) {
     on_alpha_screen_changed(GTK_WINDOW(window), nullptr, nullptr);
     g_signal_connect(window, "screen-changed", G_CALLBACK(on_alpha_screen_changed), nullptr);
 
-    g_signal_connect(window, "configure-event", G_CALLBACK(configure_cb), &info);
+    g_signal_connect_swapped(window, "enter-notify-event", G_CALLBACK(+[](keybind_info *info, GdkEventCrossing* event) -> gboolean {
+        if (info->config.dpi_aware)
+            adjust_font_size(info->vte, event->window, info->config.font_size);
+        return FALSE;
+    }), &info);
+
+    g_signal_connect_swapped(window, "configure-event", G_CALLBACK(+[](keybind_info* info, GdkEventConfigure* event) {
+        if (info->config.dpi_aware)
+            adjust_font_size(info->vte, event->window, info->config.font_size);
+    }), &info);
 
     if (info.config.fullscreen) {
         g_signal_connect(window, "window-state-event", G_CALLBACK(window_state_cb), &info);
