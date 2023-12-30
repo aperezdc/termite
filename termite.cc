@@ -95,12 +95,12 @@ enum class vi_mode {
 };
 
 struct select_info {
-    vi_mode mode;
-    long count;
-    long begin_col;
-    long begin_row;
-    long origin_col;
-    long origin_row;
+    vi_mode mode { vi_mode::insert };
+    long count { 0 };
+    long begin_col { 0 };
+    long begin_row { 0 };
+    long origin_col { 0 };
+    long origin_row { 0 };
 };
 
 struct url_data {
@@ -110,28 +110,47 @@ struct url_data {
 };
 
 struct search_panel_info {
-    GtkWidget *entry;
-    GtkWidget *da;
-    overlay_mode mode;
-    std::vector<url_data> url_list;
-    char *fulltext;
+    GtkWidget *entry { gtk_entry_new() };
+    GtkWidget *da { gtk_drawing_area_new() };
+    overlay_mode mode { overlay_mode::hidden };
+    std::vector<url_data> url_list { };
+    char *fulltext { nullptr };
+
+    ~search_panel_info() {
+        g_clear_object(&entry);
+        g_clear_object(&da);
+    }
 };
 
 struct hint_info {
-    PangoFontDescription *font;
-    cairo_pattern_t *fg, *bg, *af, *ab, *border;
-    double padding, border_width, roundness;
+    PangoFontDescription* font { nullptr };
+    cairo_pattern_t* fg { nullptr };
+    cairo_pattern_t* bg { nullptr };
+    cairo_pattern_t* af { nullptr };
+    cairo_pattern_t* ab { nullptr };
+    cairo_pattern_t* border { nullptr };
+    double padding { 0.0 };
+    double border_width { 0.0 };
+    double roundness { 0.0 };
 };
 
 struct config_info {
-    hint_info hints;
-    char *browser;
-    gboolean dynamic_title, urgent_on_bell, clickable_url, clickable_url_ctrl, size_hints;
-    gboolean filter_unmatched_urls, modify_other_keys, fullscreen, smart_copy, dpi_aware;
-    int tag;
-    char *config_file;
-    gdouble font_scale;
-    int font_size;
+    char* config_file;
+    char* browser { nullptr };
+    hint_info hints { };
+    gboolean dynamic_title { FALSE };
+    gboolean urgent_on_bell { FALSE };
+    gboolean clickable_url { FALSE };
+    gboolean clickable_url_ctrl { FALSE };
+    gboolean size_hints { FALSE };
+    gboolean filter_unmatched_urls { TRUE };
+    gboolean modify_other_keys { FALSE };
+    gboolean fullscreen { FALSE };
+    gboolean smart_copy { FALSE };
+    gboolean dpi_aware { FALSE };
+    int tag { -1 };
+    gdouble font_scale { 0.0 };
+    int font_size { 0 };
 };
 
 struct keybind_info {
@@ -140,7 +159,7 @@ struct keybind_info {
     search_panel_info panel;
     select_info select;
     config_info config;
-    std::function<void (GtkWindow *)> fullscreen_toggle;
+    std::function<void (GtkWindow *)> fullscreen_toggle { gtk_window_fullscreen };
 };
 
 struct draw_cb_info {
@@ -1852,16 +1871,11 @@ int main(int argc, char **argv) {
     }
 
     keybind_info info {
-        GTK_WINDOW(window), vte,
-        {gtk_entry_new(),
-         gtk_drawing_area_new(),
-         overlay_mode::hidden,
-         std::vector<url_data>(),
-         nullptr},
-        {vi_mode::insert, 0, 0, 0, 0, 0},
-        {{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 0, 0, 0},
-         nullptr, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, -1, config_file, 0},
-        gtk_window_fullscreen
+        GTK_WINDOW(window),
+        vte,
+        search_panel_info {},
+        select_info {},
+        config_info { config_file },
     };
 
     load_config(GTK_WINDOW(window), vte, scrollbar, hbox, &info.config,
