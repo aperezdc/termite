@@ -159,7 +159,6 @@ static gboolean position_overlay_cb(GtkBin *overlay, GtkWidget *widget, GdkRecta
 static gboolean button_press_cb(VteTerminal *vte, GdkEventButton *event, const config_info *info);
 static void bell_cb(GtkWidget *vte, gboolean *urgent_on_bell);
 static gboolean focus_cb(GtkWindow *window);
-static void configure_cb(GtkWidget *widget, GdkEventConfigure *event, keybind_info *info);
 
 static GtkTreeModel *create_completion_model(VteTerminal *vte);
 static void search(VteTerminal *vte, const char *pattern, bool reverse);
