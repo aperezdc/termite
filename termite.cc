@@ -687,7 +687,7 @@ static void move_backward_word(VteTerminal *vte, select_info *select) {
 }
 
 static void move_backward_blank_word(VteTerminal *vte, select_info *select) {
-    move_backward(vte, select, std::not1(std::ref(g_unichar_isspace)));
+    move_backward(vte, select, std::not_fn(g_unichar_isspace));
 }
 
 template<typename F>
@@ -815,7 +815,7 @@ static void move_forward_end_word(VteTerminal *vte, select_info *select) {
 }
 
 static void move_forward_end_blank_word(VteTerminal *vte, select_info *select) {
-    move_forward(vte, select, std::not1(std::ref(g_unichar_isspace)), true);
+    move_forward(vte, select, std::not_fn(g_unichar_isspace), true);
 }
 
 static void move_forward_word(VteTerminal *vte, select_info *select) {
@@ -823,7 +823,7 @@ static void move_forward_word(VteTerminal *vte, select_info *select) {
 }
 
 static void move_forward_blank_word(VteTerminal *vte, select_info *select) {
-    move_forward(vte, select, std::not1(std::ref(g_unichar_isspace)), false);
+    move_forward(vte, select, std::not_fn(g_unichar_isspace), false);
 }
 
 /* {{{ CALLBACKS */
@@ -988,7 +988,7 @@ gboolean key_press_cb(VteTerminal *vte, GdkEventKey *event, keybind_info *info) 
                 break;
             case GDK_KEY_asciicircum:
                 set_cursor_column(vte, &info->select, 0);
-                move_first(vte, &info->select, std::not1(std::ref(g_unichar_isspace)));
+                move_first(vte, &info->select, std::not_fn(g_unichar_isspace));
                 break;
             case GDK_KEY_dollar:
             case GDK_KEY_End:
