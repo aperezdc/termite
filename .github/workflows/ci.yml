@@ -10,36 +10,26 @@ on:
 jobs:
   linux:
     name: Linux
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     strategy:
       fail-fast: false
       matrix:
         include:
-          - compiler: clang
-            cxxcompiler: clang++
+          - compiler: clang-15
+            cxxcompiler: clang++-15
+            linker: lld
           - compiler: gcc-10
             cxxcompiler: g++-10
+            linker: bfd
     env:
       CC: ${{ matrix.compiler }}
       CXX: ${{ matrix.cxxcompiler }}
+      LDFLAGS: -fuse-ld=${{ matrix.linker }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-
-      - name: Setup cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('.github/workflows/ci.yml') }}
-          restore-keys: ${{ runner.os }}-pip-
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         env:
@@ -57,13 +47,11 @@ jobs:
             libpcre2-dev \
             libsystemd-dev \
             ninja-build \
+            meson \
+            lld-15 \
+            clang-15 \
             gcc-10 \
             g++-10
-          echo '::endgroup::'
-
-          echo '::group::Python packages'
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install meson==0.60
           echo '::endgroup::'
 
       - name: Install GCC problem matcher
