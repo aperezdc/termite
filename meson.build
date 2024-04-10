@@ -23,7 +23,7 @@ add_project_arguments(
 vte_subproject = subproject('vte',
 	default_options: [
 		'default_library=static',
-		'debugg=false',
+		'dbg=false',
 		'docs=false',
 		'gir=false',
 		'glade=false',
