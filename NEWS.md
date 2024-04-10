@@ -2,6 +2,29 @@
 
 This file documents notable user-facing changes introduced in each release.
 
+## v16.7
+
+### Added
+
+- New `copy_mouse_selection` configuration option, which will automatically
+  send selections done with the mouse in insert mode to the `CLIPBOARD`
+  buffer as well as `PRIMARY` one. When disabled, selections are still
+  sent to `PRIMARY`, which was the existing behaviour.
+- **Experimental**. New `dpi_aware` configuration option, which will adjust
+  the font size to match the expected physical size in points for the
+  monitor where the window is being shown. The adjustment is updated when
+  the window changes monitors, but this is somewhat unreliable under some
+  Wayland compositors, therefore the option is disabled by default.
+
+### Changed
+
+- Update VTE subproject to version 0.76.1, which brings in a number of
+  performance improvements.
+- Meson 1.0.0 is now the minimum usable for building.
+- Replace uses of `std::not1()`, which has been deprecated in C++17,
+  with the generic `std::not_fn()` helper.
+
+
 ## v16.6
 
 ### Changed
