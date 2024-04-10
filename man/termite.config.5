@@ -80,6 +80,9 @@ Sets the window as urgent on the terminal bell.
 Enable smart copy. \fB^C\fR will copy if text has been selected.
 \fB^V\fR will paste. It is no longer possible to send a \fB^V\fR to the
 running program when this option is enabled.
+.IP \fIcopy_mouse_selection\fR
+Copy text selected with the mouse also to the clipboard; when disabled,
+selected text is used for the \fBPRIMARY\fR selection (default: \fBfalse\fR).
 .IP \fIbidi\fR
 Enable bidirectional text rendering (default: \fBfalse\fR).
 .IP \fIarabic_shaping\fR

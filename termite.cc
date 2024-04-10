@@ -148,6 +148,7 @@ struct config_info {
     gboolean fullscreen { FALSE };
     gboolean smart_copy { FALSE };
     gboolean dpi_aware { FALSE };
+    gboolean copy_mouse_selection { FALSE };
     int tag { -1 };
     gdouble font_scale { 0.0 };
     int font_size { 0 };
@@ -1629,6 +1630,7 @@ static void set_config(GtkWindow *window, VteTerminal *vte, GtkWidget *scrollbar
     info->fullscreen = cfg_bool("fullscreen", TRUE);
     info->smart_copy = cfg_bool("smart_copy", FALSE);
     info->dpi_aware = cfg_bool("dpi_aware", FALSE);
+    info->copy_mouse_selection = cfg_bool("copy_mouse_selection", FALSE);
     info->font_scale = vte_terminal_get_font_scale(vte);
 
     g_free(info->browser);
@@ -1940,6 +1942,11 @@ int main(int argc, char **argv) {
     g_signal_connect_swapped(window, "configure-event", G_CALLBACK(+[](keybind_info* info, GdkEventConfigure* event) {
         if (info->config.dpi_aware)
             adjust_font_size(info->vte, event->window, info->config.font_size);
+    }), &info);
+
+    g_signal_connect_swapped(vte, "selection-changed", G_CALLBACK(+[](keybind_info* info) {
+        if (info->config.copy_mouse_selection && info->select.mode == vi_mode::insert && vte_terminal_get_has_selection(info->vte))
+            vte_terminal_copy_clipboard_format(info->vte, VTE_FORMAT_TEXT);
     }), &info);
 
     if (info.config.fullscreen) {
