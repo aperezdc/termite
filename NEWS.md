@@ -2,6 +2,19 @@
 
 This file documents notable user-facing changes introduced in each release.
 
+## v16.8
+
+### Fixed
+
+- Fix URL hints mode not working in version 16.7 due to behaviour change
+  introduced in VTE in its 0.76.x update.
+
+### Changed
+
+- Avoid usage of deprecated VTE functionality.
+- Make VTE widget centered inside the Termite window.
+
+
 ## v16.7
 
 ### Added
