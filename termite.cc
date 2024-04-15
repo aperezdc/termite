@@ -328,43 +328,32 @@ static void launch_in_directory(VteTerminal *vte) {
     g_spawn_async(dir.get(), cmd, nullptr, G_SPAWN_SEARCH_PATH, nullptr, nullptr, nullptr, nullptr);
 }
 
-static void find_urls(VteTerminal *vte, search_panel_info *panel_info) {
-    GRegex *regex = g_regex_new(url_regex, G_REGEX_CASELESS, G_REGEX_MATCH_NOTEMPTY, nullptr);
-    GArray *attributes = g_array_new(FALSE, FALSE, sizeof(VteCharAttributes));
-    auto content = make_unique(vte_terminal_get_text(vte, nullptr, nullptr, attributes), g_free);
+static void
+find_urls(VteTerminal *vte, search_panel_info *panel_info)
+{
+    g_autoptr(GRegex) regex = g_regex_new(url_regex, G_REGEX_CASELESS, G_REGEX_MATCH_NOTEMPTY, nullptr);
+    g_autofree char* content = vte_terminal_get_text_format(vte, VTE_FORMAT_TEXT);
 
-    for (char *s_ptr = content.get(), *saveptr; ; s_ptr = nullptr) {
+    unsigned row = 0;
+    for (char *s_ptr = content, *saveptr; ; s_ptr = nullptr, ++row) {
         const char *token = strtok_r(s_ptr, "\n", &saveptr);
-        if (!token) {
+        if (!token)
             break;
-        }
 
-        GError *error = nullptr;
-        GMatchInfo *info;
+        g_autoptr(GError) error = nullptr;
+        g_autoptr(GMatchInfo) info = nullptr;
+        g_regex_match_full(regex, token, -1, 0, static_cast<GRegexMatchFlags>(0), &info, &error);
 
-        g_regex_match_full(regex, token, -1, 0, (GRegexMatchFlags)0, &info, &error);
         while (g_match_info_matches(info)) {
             int pos;
             g_match_info_fetch_pos(info, 0, &pos, nullptr);
-
-            const long first_row = g_array_index(attributes, VteCharAttributes, 0).row;
-            const auto attr = g_array_index(attributes, VteCharAttributes, token + pos - content.get());
-
-            panel_info->url_list.emplace_back(g_match_info_fetch(info, 0),
-                                              attr.column,
-                                              attr.row - first_row);
+            panel_info->url_list.emplace_back(g_match_info_fetch(info, 0), pos, row);
             g_match_info_next(info, &error);
         }
 
-        g_match_info_free(info);
-
-        if (error) {
+        if (error)
             g_printerr("error while matching: %s\n", error->message);
-            g_error_free(error);
-        }
     }
-    g_regex_unref(regex);
-    g_array_free(attributes, TRUE);
 }
 
 static void launch_url(char *browser, const char *text, search_panel_info *info) {
