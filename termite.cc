@@ -614,9 +614,9 @@ static void open_selection(char *browser, VteTerminal *vte) {
 }
 
 static std::unique_ptr<char, decltype(&g_free)>
-get_text_range(VteTerminal *vte, long start_row, long start_col, long end_row, long end_col) {
-    return {vte_terminal_get_text_range(vte, start_row, start_col, end_row, end_col,
-                                        nullptr, nullptr, nullptr), g_free};
+get_text_range(VteTerminal *vte, long start_row, long start_col, long end_row, long end_col)
+{
+    return {vte_terminal_get_text_range_format(vte, VTE_FORMAT_TEXT, start_row, start_col, end_row, end_col, nullptr), g_free};
 }
 
 static bool is_word_char(gunichar c) {
