@@ -1612,7 +1612,7 @@ static void set_config(GtkWindow *window, VteTerminal *vte, GtkWidget *scrollbar
     vte_terminal_set_scroll_on_keystroke(vte, cfg_bool("scroll_on_keystroke", TRUE));
     vte_terminal_set_audible_bell(vte, cfg_bool("audible_bell", FALSE));
     vte_terminal_set_mouse_autohide(vte, cfg_bool("mouse_autohide", FALSE));
-    vte_terminal_set_allow_bold(vte, cfg_bool("allow_bold", TRUE));
+    g_object_set(vte, "allow-bold", cfg_bool("allow_bold", TRUE), nullptr);  // Use g_object_set to avoid deprecation warning.
     vte_terminal_search_set_wrap_around(vte, cfg_bool("search_wrap", TRUE));
     vte_terminal_set_allow_hyperlink(vte, cfg_bool("hyperlinks", FALSE));
     vte_terminal_set_bold_is_bright(vte, cfg_bool("bold_is_bright", TRUE));
