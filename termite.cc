@@ -1832,6 +1832,8 @@ int main(int argc, char **argv) {
 
     GtkWidget *vte_widget = vte_terminal_new();
     VteTerminal *vte = VTE_TERMINAL(vte_widget);
+    vte_terminal_set_xalign(vte, VTE_ALIGN_CENTER);
+    vte_terminal_set_yalign(vte, VTE_ALIGN_CENTER);
 
     GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_style_context_add_class(gtk_widget_get_style_context(hbox),"termite");
