@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2021-2024 Adrian Perez de Castro
  * Copyright (C) 2013 Daniel Micay
  *
  * This is free software; you can redistribute it and/or modify it under
@@ -18,6 +19,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -334,15 +336,25 @@ find_urls(VteTerminal *vte, search_panel_info *panel_info)
     g_autoptr(GRegex) regex = g_regex_new(url_regex, G_REGEX_CASELESS, G_REGEX_MATCH_NOTEMPTY, nullptr);
     g_autofree char* content = vte_terminal_get_text_format(vte, VTE_FORMAT_TEXT);
 
-    unsigned row = 0;
-    for (char *s_ptr = content, *saveptr; ; s_ptr = nullptr, ++row) {
-        const char *token = strtok_r(s_ptr, "\n", &saveptr);
-        if (!token)
-            break;
+    const char *start_pos = content;
+    const char *end_pos = strchrnul(start_pos, '\n');
+
+    for (unsigned row = 0;
+         *start_pos != '\0';
+         ++row, start_pos = end_pos + 1, end_pos = strchrnul(start_pos, '\n'))
+    {
+        const auto line_length = end_pos - start_pos;
+
+        assert(start_pos >= content);
+        assert(start_pos <= end_pos);
+        assert(line_length >= 0);
+
+        if (!line_length)  // Empty line.
+            continue;
 
         g_autoptr(GError) error = nullptr;
         g_autoptr(GMatchInfo) info = nullptr;
-        g_regex_match_full(regex, token, -1, 0, static_cast<GRegexMatchFlags>(0), &info, &error);
+        g_regex_match_full(regex, start_pos, line_length, 0, static_cast<GRegexMatchFlags>(0), &info, &error);
 
         while (g_match_info_matches(info)) {
             int pos;
