@@ -2,6 +2,14 @@
 
 This file documents notable user-facing changes introduced in each release.
 
+## v16.9
+
+### Fixed
+
+- Fix vertical locations of URL hint labels in presence of empty lines
+  in the terminal widget.
+
+
 ## v16.8
 
 ### Fixed
