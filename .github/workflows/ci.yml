@@ -10,17 +10,17 @@ on:
 jobs:
   linux:
     name: Linux
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     strategy:
       fail-fast: false
       matrix:
         include:
-          - compiler: clang-15
-            cxxcompiler: clang++-15
+          - compiler: clang
+            cxxcompiler: clang++
             linker: lld
-          - compiler: gcc-10
-            cxxcompiler: g++-10
+          - compiler: gcc-11
+            cxxcompiler: g++-11
             linker: bfd
     env:
       CC: ${{ matrix.compiler }}
@@ -44,14 +44,15 @@ jobs:
             gperf \
             libgnutls28-dev \
             libgtk-3-dev \
+            libicu-dev \
             libpcre2-dev \
             libsystemd-dev \
             ninja-build \
             meson \
-            lld-15 \
-            clang-15 \
-            gcc-10 \
-            g++-10
+            lld \
+            clang \
+            gcc-11 \
+            g++-11
           echo '::endgroup::'
 
       - name: Install GCC problem matcher
