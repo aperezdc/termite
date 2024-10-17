@@ -44,6 +44,21 @@
 
 #include "url_regex.hh"
 
+typedef struct {
+  const char *pattern;
+} TerminalRegexPattern;
+
+static const TerminalRegexPattern url_regex_patterns[] = {
+  REGEX_URL_AS_IS,
+  REGEX_URL_HTTP,
+  REGEX_URL_FILE,
+  REGEX_URL_VOIP,
+  REGEX_EMAIL,
+  REGEX_NEWS_MAN,
+};
+
+static guint n_url_regexes;
+
 using namespace std::placeholders;
 
 template <typename T, typename Deleter>
@@ -1648,12 +1663,16 @@ static void set_config(GtkWindow *window, VteTerminal *vte, GtkWidget *scrollbar
     }
 
     if (info->clickable_url) {
-        info->tag = vte_terminal_match_add_regex(vte,
-                vte_regex_new_for_match(url_regex,
-                                        (gssize) strlen(url_regex),
-                                        PCRE2_MULTILINE | PCRE2_NOTEMPTY,
-                                        nullptr),
+        n_url_regexes = G_N_ELEMENTS (url_regex_patterns);
+        for (int i = 0; i < n_url_regexes; ++i)
+        {
+            info->tag = vte_terminal_match_add_regex(vte,
+                vte_regex_new_for_match(url_regex_patterns[i].pattern,
+                    (gssize) strlen(url_regex_patterns[i].pattern),
+                    PCRE2_UTF | PCRE2_NO_UTF_CHECK | PCRE2_UCP | PCRE2_MULTILINE,
+                    nullptr),
                 0);
+        }
         vte_terminal_match_set_cursor_name(vte, info->tag, "hand");
     } else if (info->tag != -1) {
         vte_terminal_match_remove(vte, info->tag);
