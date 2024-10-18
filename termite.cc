@@ -53,8 +53,6 @@ static const char *const url_regex_patterns[] = {
   REGEX_NEWS_MAN,
 };
 
-static guint n_url_regexes;
-
 using namespace std::placeholders;
 
 template <typename T, typename Deleter>
@@ -1659,8 +1657,7 @@ static void set_config(GtkWindow *window, VteTerminal *vte, GtkWidget *scrollbar
     }
 
     if (info->clickable_url) {
-        n_url_regexes = G_N_ELEMENTS (url_regex_patterns);
-        for (int i = 0; i < n_url_regexes; ++i)
+        for (int i = 0; i < G_N_ELEMENTS (url_regex_patterns); ++i)
         {
             info->tag = vte_terminal_match_add_regex(vte,
                 vte_regex_new_for_match(url_regex_patterns[i],
