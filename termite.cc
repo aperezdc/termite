@@ -44,11 +44,7 @@
 
 #include "url_regex.hh"
 
-typedef struct {
-  const char *pattern;
-} TerminalRegexPattern;
-
-static const TerminalRegexPattern url_regex_patterns[] = {
+static const char *const url_regex_patterns[] = {
   REGEX_URL_AS_IS,
   REGEX_URL_HTTP,
   REGEX_URL_FILE,
@@ -1667,8 +1663,8 @@ static void set_config(GtkWindow *window, VteTerminal *vte, GtkWidget *scrollbar
         for (int i = 0; i < n_url_regexes; ++i)
         {
             info->tag = vte_terminal_match_add_regex(vte,
-                vte_regex_new_for_match(url_regex_patterns[i].pattern,
-                    (gssize) strlen(url_regex_patterns[i].pattern),
+                vte_regex_new_for_match(url_regex_patterns[i],
+                    (gssize) strlen(url_regex_patterns[i]),
                     PCRE2_UTF | PCRE2_NO_UTF_CHECK | PCRE2_UCP | PCRE2_MULTILINE,
                     nullptr),
                 0);
